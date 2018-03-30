@@ -1,16 +1,29 @@
+
 const String POOP = "💩";
+const String HEART = "";// TODO
+const String KISS = "";// TODO
+const String CLAP = "";// TODO
+const String SAD = "";// TODO
+const String SMILE = "";// TODO
+
 const String OUTBOUND = "twilio";
+const String INBOUND = "twilio"; // TODO
 
 void setup() {
-  emitPoop();
-}
-
-void emitPoop() {
-  emit(OUTBOUND, POOP);
+  send(POOP);
+  Particle.subscribe("hook-response/" + INBOUND, handleInboundMessage, MY_DEVICES);
 }
 
 void loop() {
   log("Sent message.");
+}
+
+void handleInboundMessage(const char *event, const char *data) {
+  log(data);
+}
+
+void send(String message) {
+  emit(OUTBOUND, message);
 }
 
 void emit(String channel, String message) {
