@@ -3,12 +3,13 @@
 
 const int BAUD_RATE = 115200;
 
-const String THINGSPEAK_USERNAME = "andyartz";
-const String THINGSPEAK_MQTT_API_KEY = "SZTZGZVSNCSQ3L73";
+const String THINGSPEAK_USERNAME = "ezequiell";
+const String THINGSPEAK_MQTT_API_KEY = "OSHZIWGV4LCZ6LE7";
 
-const String EMOTE_EVENT_PARTICLE_WEBHOOK_NAME = "count";
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER = "428136";
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY = "DD3L474U2F2F1G5V";
+
+const String EMOTE_EVENT_PARTICLE_WEBHOOK_NAME = "emote";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER = "467440";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY = "80HXPU3QJX8H7CJF";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_FIELD = "field1";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL = "channels/"
                                               + EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER
@@ -20,11 +21,11 @@ const String EMOTE_EVENT_THINGSPEAK_CHANNEL = "channels/"
 const int THINGSPEAK_MQTT_PORT = 1883;
 
 const String POOP = "💩";
-const String HEART = "";// TODO
-const String KISS = "";// TODO
-const String CLAP = "";// TODO
-const String SAD = "";// TODO
-const String SMILE = "";// TODO
+const String HEART = "❤️";
+const String KISS = "😘";
+const String CLAP = "👏";
+const String SAD = "☹️";
+const String SMILE = "😀";
 
 const String OUTBOUND = "twilio";
 const String INBOUND = "twilio"; // TODO
