@@ -4,7 +4,7 @@
 const int BAUD_RATE = 115200;
 
 const String THINGSPEAK_USERNAME = "ezequiell";
-const String THINGSPEAK_MQTT_API_KEY = "OSHZIWGV4LCZ6LE7";
+const String THINGSPEAK_MQTT_API_KEY = "KJD6QV2N7PJ2YM7K";
 
 
 const String EMOTE_EVENT_PARTICLE_WEBHOOK_NAME = "emote";
@@ -48,6 +48,8 @@ void subscribeMQTT() {
     if ( client.isConnected())   {
       String subscribed = String(client.subscribe( EMOTE_EVENT_THINGSPEAK_CHANNEL ));
       emit("subscribed", subscribed);
+    } else {
+      emit("NOT WORKING PIECE OF CRAP", SAD);
     }
 
     delay( ONE_SECOND_IN_MILLIS );
