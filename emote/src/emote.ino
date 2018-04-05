@@ -22,10 +22,11 @@ const int THINGSPEAK_MQTT_PORT = 1883;
 
 const String POOP = "💩";
 const String HEART = "❤️";
+const String SAD = "☹️";
 const String KISS = "😘";
 const String CLAP = "👏";
-const String SAD = "☹️";
 const String SMILE = "😀";
+
 
 const String OUTBOUND = "twilio";
 const String INBOUND = "twilio"; // TODO
