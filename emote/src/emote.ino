@@ -6,7 +6,6 @@ const int BAUD_RATE = 115200;
 const String THINGSPEAK_USERNAME = "ezequiell";
 const String THINGSPEAK_MQTT_API_KEY = "KJD6QV2N7PJ2YM7K";
 
-
 const String EMOTE_EVENT_PARTICLE_WEBHOOK_NAME = "emote";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER = "467440";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY = "80HXPU3QJX8H7CJF";
@@ -19,6 +18,7 @@ const String EMOTE_EVENT_THINGSPEAK_CHANNEL = "channels/"
                                               + EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY;
 
 const int THINGSPEAK_MQTT_PORT = 1883;
+const int REMOTE_CONFIG_PIN = D0;
 
 const String POOP = "💩";
 const String HEART = "❤️";
@@ -27,34 +27,66 @@ const String KISS = "😘";
 const String CLAP = "👏";
 const String SMILE = "😀";
 
-
 const String OUTBOUND = "twilio";
 const String INBOUND = "twilio"; // TODO
 
 const int ONE_SECOND_IN_MILLIS = 1000;
 
+const int FLOWER = 0;
+const int TARDIS = 1;
+
+int config = 0;
+String name = "none";
+
 StaticJsonBuffer<200> jsonBuffer;
 MQTT client("mqtt.thingspeak.com", THINGSPEAK_MQTT_PORT, mqttEventHandler);
 
 void setup() {
+
+  emit("version", "v0.0.2");
+
   setupSerialConnection();
+  doConfig();
   subscribeMQTT();
 }
 
+// config //////////////////////////////////////////////////////////////////////
+
+void doConfig() {
+  setupInputPin(REMOTE_CONFIG_PIN);
+  config = digitalRead(REMOTE_CONFIG_PIN);
+  if (isFlower()) {
+    name == "Flower";
+    emit("config", "Device is a flower.");
+  } else if (isTardis()) {
+    name == "Tardis";
+    emit("config", "Device is a Tardis.");
+  } else {
+    emit("config", "ERROR! Device has no configuration: " + config );
+  }
+}
+
+bool isFlower() {
+  return config == FLOWER;
+}
+
+bool isTardis() {
+  return config == TARDIS;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void subscribeMQTT() {
-    client.connect( "meaninglessID", THINGSPEAK_USERNAME, THINGSPEAK_MQTT_API_KEY, NULL, MQTT::QOS0, 0, NULL, true);
+    client.connect( name, THINGSPEAK_USERNAME, THINGSPEAK_MQTT_API_KEY, NULL, MQTT::QOS0, 0, NULL, true);
 
     delay( ONE_SECOND_IN_MILLIS );
 
-    if ( client.isConnected())   {
+    if ( client.isConnected()) {
       String subscribed = String(client.subscribe( EMOTE_EVENT_THINGSPEAK_CHANNEL ));
       emit("subscribed", subscribed);
     } else {
-      emit("NOT WORKING PIECE OF CRAP", SAD);
+      emit("subscribed", SAD + "ERROR! Thingspeak MQTT connection failed.");
     }
-
-    delay( ONE_SECOND_IN_MILLIS );
-    emit(EMOTE_EVENT_PARTICLE_WEBHOOK_NAME, POOP); // this is for testing
 }
 
 void loop() {
@@ -64,26 +96,48 @@ void loop() {
 void mqttEventHandler( char* topic, byte* payload, unsigned int length ) {
   emit("mqtt", "emote event detected");
 
-    char p[ length + 1 ]; // Leave an extra space to null terminate the string.
-    memcpy( p, payload, length );
-    p[ length ] = NULL;  // Terminate the string.
+    char emoji[ length + 1 ]; // Leave an extra space to null terminate the string.
+    memcpy( emoji, payload, length );
+    emoji[ length ] = NULL;  // Terminate the string.
 
-    if (strcmp(p, POOP) == 0) {
-      handlePoop();
-    } else if (strcmp(p, HEART) == 0) {
-      handleHeart();
-    } else if (strcmp(p, KISS) == 0) {
-      handleKiss();
-    } else if (strcmp(p, CLAP) == 0) {
-      handleClap();
-    } else if (strcmp(p, SMILE) == 0) {
-      handleSmile();
-    } else if (strcmp(p, SAD) == 0) {
-      handleSad();
-    } else {
-      handleUnknown(p);
+    if (isFlower()) {
+      handleAsFlower(emoji);
+    } else if (isTardis()) {
+      handleAsTardis(emoji);
     }
 }
+
+void handleAsFlower(String emoji) {
+
+  if (emoji == POOP) {
+    handlePoop();
+  } else if (emoji == HEART) {
+    handleHeart();
+  } else if (emoji == KISS) {
+    handleKiss();
+  } else {
+    handleUnknown(emoji);
+  }
+}
+
+void handleAsTardis(String emoji) {
+
+  if (emoji == CLAP) {
+    handleClap();
+  } else if (emoji == SMILE) {
+    handleSmile();
+  } else if (emoji == SAD) {
+    handleSad();
+  } else {
+    handleUnknown(emoji);
+  }
+}
+
+void handleUnknown(String payload) {
+  emit("mqtt", payload);
+}
+
+// Flower handlers /////////////////////////////////////////////////////////////
 
 void handlePoop() {
   emit("mqtt", POOP);
@@ -97,6 +151,8 @@ void handleKiss() {
   emit("mqtt", KISS);
 }
 
+// Tardis handlers /////////////////////////////////////////////////////////////
+
 void handleClap() {
   emit("mqtt", CLAP);
 }
@@ -109,9 +165,6 @@ void handleSad() {
   emit("mqtt", SAD);
 }
 
-void handleUnknown(String payload) {
-  emit("mqtt", payload);
-}
 
 // void handleInboundMessage(const char *event, const char *data) {
 //   log("Incoming message detected!!!");
@@ -130,6 +183,10 @@ void send(String message) {
 }
 
 // Utility Code Starts here ///////////////////////////////////////////////
+
+void setupInputPin(int pin) {
+  pinMode(pin, INPUT_PULLDOWN);
+}
 
 void setupSerialConnection() {
   Serial.begin(BAUD_RATE);
