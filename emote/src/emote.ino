@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <MQTT.h>
 
 const int BAUD_RATE = 115200;
