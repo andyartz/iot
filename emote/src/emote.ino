@@ -1,6 +1,6 @@
 #include <MQTT.h>
 
-const String VERSION = "v0.0.7";
+const String VERSION = "v0.0.8";
 
 const int BAUD_RATE = 115200;
 
@@ -25,12 +25,12 @@ const int SWITCH_PIN_1 = A1;
 const int SWITCH_PIN_2 = A2;
 
 // Emoji ///////////////////////////////////////////////////////////////////////
-const String POOP = "💩";
-const String HEART = "❤️";
-const String SAD = "☹️";
-const String THUMBS_UP = "👍";
-const String CLAP = "👏";
-const String SMILE = "😀";
+const String POOP = ":poop:";
+const String HEART = ":heart:";
+const String SAD = ":frowning:";
+const String THUMBS_UP = ":thumbsup:";
+const String CLAP = ":clap:";
+const String SMILE = ":smile:";
 
 const int ONE_SECOND_IN_MILLIS = 1000;
 
