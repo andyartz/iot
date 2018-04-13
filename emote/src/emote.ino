@@ -249,29 +249,29 @@ void handleUnknown(String payload) {
 // Flower handlers /////////////////////////////////////////////////////////////
 
 void handlePoop() {
-  emit("mqtt", POOP);
+  emit("mqtt", "I can handle " + POOP);
 }
 
 void handleHeart() {
-  emit("mqtt", HEART);
+  emit("mqtt", "I can handle " + HEART);
 }
 
 void handleTHUMBS_UP() {
-  emit("mqtt", THUMBS_UP);
+  emit("mqtt", "I can handle " + THUMBS_UP);
 }
 
 // Tardis handlers /////////////////////////////////////////////////////////////
 
 void handleClap() {
-  emit("mqtt", CLAP);
+  emit("mqtt", "I can handle " + CLAP);
 }
 
 void handleSmile() {
-  emit("mqtt", SMILE);
+  emit("mqtt", "I can handle " + SMILE);
 }
 
 void handleSad() {
-  emit("mqtt", SAD);
+  emit("mqtt",  "I can handle " + SAD);
 }
 
 // Utility Code Starts here ///////////////////////////////////////////////
