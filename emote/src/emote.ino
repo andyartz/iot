@@ -1,6 +1,6 @@
 #include <MQTT.h>
 
-const String VERSION = "v0.0.9";
+const String VERSION = "v0.0.10";
 
 const int BAUD_RATE = 115200;
 
