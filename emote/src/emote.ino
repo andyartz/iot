@@ -1,6 +1,6 @@
 #include <MQTT.h>
 
-const String VERSION = "v0.0.8";
+const String VERSION = "v0.0.9";
 
 const int BAUD_RATE = 115200;
 
@@ -78,11 +78,11 @@ void doConfig() {
   config = digitalRead(REMOTE_CONFIG_PIN);
 
   if (isFlower()) {
-    name == "Flower";
-    emit("config", "Device is a flower.");
+    name = "Flower";
+    emit("config", "Device is a flower. Name is " + name);
   } else if (isTardis()) {
-    name == "Tardis";
-    emit("config", "Device is a Tardis.");
+    name = "Tardis";
+    emit("config", "Device is a Tardis. Name is " + name);
   } else {
     emit("config", "ERROR! Device has no configuration: " + config );
   }
