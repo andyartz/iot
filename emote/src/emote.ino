@@ -1,6 +1,7 @@
 #include <MQTT.h>
+#include <neopixel/neopixel.h>
 
-const String VERSION = "v0.0.10";
+const String VERSION = "v0.2.0";
 
 const int BAUD_RATE = 115200;
 
@@ -20,6 +21,9 @@ const int THINGSPEAK_MQTT_PORT = 1883;
 
 // Pins ////////////////////////////////////////////////////////////////////////
 const int REMOTE_CONFIG_PIN = D0;
+const int SOUND_PIN = D1;
+const int MOTOR_PIN = D2;
+const int LED_PIN = D3;
 const int SWITCH_PIN_0 = A0;
 const int SWITCH_PIN_1 = A1;
 const int SWITCH_PIN_2 = A2;
@@ -33,6 +37,11 @@ const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
 const int ONE_SECOND_IN_MILLIS = 1000;
+const int ONE_HUNDRED_MILLISECONDS = 100;
+const int ONE_MILLISECOND = 1;
+const int ONE_SECOND = 1;
+
+const int NUMBER_OF_LEDS = 1;
 
 const int FLOWER = 0;
 const int TARDIS = 1;
@@ -49,6 +58,7 @@ bool lastState2 = FALSE;
 bool currentState2 = FALSE;
 
 MQTT client("mqtt.thingspeak.com", THINGSPEAK_MQTT_PORT, mqttEventHandler);
+Adafruit_NeoPixel ledStrip = Adafruit_NeoPixel(NUMBER_OF_LEDS, LED_PIN, WS2812);
 
 void setup() {
 
@@ -58,6 +68,11 @@ void setup() {
   setupSerialConnection();
   doConfig();
   setupMQTT();
+  setupLEDs();
+  setupSound();
+  setupMotor();
+
+  // testLeds(); //TODO remove this after development
 }
 
 void setupSwitches() {
@@ -68,6 +83,22 @@ void setupSwitches() {
 
 void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
+}
+
+void setupLEDs() {
+  ledStrip.begin();
+  for (int i=0; i<NUMBER_OF_LEDS; i++) {
+    turnOffLed(i);
+  }
+}
+
+void setupSound() {
+  pinMode(SOUND_PIN, INPUT_PULLDOWN);
+}
+
+void setupMotor() {
+  pinMode(MOTOR_PIN, OUTPUT);
+  digitalWrite(MOTOR_PIN, 0);
 }
 
 // config //////////////////////////////////////////////////////////////////////
@@ -84,7 +115,7 @@ void doConfig() {
     name = "Tardis";
     emit("config", "Device is a Tardis. Name is " + name);
   } else {
-    emit("config", "ERROR! Device has no configuration: " + config );
+    emit("error", "ERROR! Device has no configuration: " + config );
   }
 }
 
@@ -103,12 +134,19 @@ void setupMQTT() {
 
     delay( ONE_SECOND_IN_MILLIS );
 
-    if ( client.isConnected()) {
+    if ( client.isConnected() ) {
       String subscribed = subscribeToMQTT();
       emit("subscribed", subscribed);
     } else {
-      emit("subscribed", SAD + "ERROR! Thingspeak MQTT connection failed.");
+      emit("error", SAD + "ERROR! Thingspeak MQTT connection failed.");
     }
+}
+
+void checkConnection() {
+   if (!client.isConnected()) {
+     emit("error", "MQTT is no longer conneccted. Reconnecting...");
+     setupMQTT();
+   }
 }
 
 String subscribeToMQTT() {
@@ -149,8 +187,93 @@ String getApiKey() {
   }
 }
 
+// LED Code ////////////////////////////////////////////////////////////////////
+
+const int BLINK_TIME = ONE_HUNDRED_MILLISECONDS;
+const int FADE_SPEED = 5 * ONE_MILLISECOND;
+const int COLOR_HOLD_TIME = ONE_SECOND;
+
+const int MAIN_LED = 0;
+const int SECONDARY_LED = 1;
+
+int RED[3] = {255, 0, 0};
+int GREEN[3] = {0, 255, 0};
+int BLUE[3] = {0, 0, 255};
+int YELLOW[3] = {255, 255, 0};
+int CYAN[3] = {0, 255, 255};
+int MAGENTA[3] = {255, 0, 255};
+int WHITE[3] = {255, 255, 255};
+int OFF_WHITE[3] = {255, 255, 80};
+int OFF[3] = {0, 0, 0};
+
+int currentColor[2][3] = {{0,0,0}, {0,0,0}};
+
+void testLeds() {
+  emit("testing leds", "testing...");
+  for (int led=0; led<NUMBER_OF_LEDS; led++) {
+    emit("testing led", String(led));
+    testLed(led);
+  }
+}
+
+void testLed(int led) {
+  fadeToAndHoldColor(led, WHITE, ONE_SECOND);
+  fadeToAndHoldColor(led, RED, ONE_SECOND);
+  fadeToAndHoldColor(led, GREEN, ONE_SECOND);
+  fadeToAndHoldColor(led, BLUE, ONE_SECOND);
+  fadeToAndHoldColor(led, CYAN, ONE_SECOND);
+  fadeToAndHoldColor(led, MAGENTA, ONE_SECOND);
+  fadeToAndHoldColor(led, YELLOW, ONE_SECOND);
+  fadeToAndHoldColor(led, OFF, ONE_SECOND);
+}
+
+void turnOffLed(int ledOffset) {
+  displayColor(ledOffset, OFF);
+}
+
+void fadeToAndHoldColor(int ledOffset, int targetColor[3], int secondsToHold) {
+  fadeToColor(ledOffset, targetColor);
+  waitSeconds(secondsToHold);
+}
+
+void fadeToColor(int ledOffset, int targetColor[3]) {
+  while(!isColor(ledOffset, targetColor)) {
+    stepColor(ledOffset, targetColor);
+  }
+}
+
+bool isColor(int ledOffset, int targetColor[3]) {
+  return currentColor[ledOffset][0] == targetColor[0] && currentColor[ledOffset][1] == targetColor[1] && currentColor[ledOffset][2] == targetColor[2];
+}
+
+void stepColor(int ledOffset, int targetColor[3]) {
+  currentColor[ledOffset][0] += compare(currentColor[ledOffset][0], targetColor[0]);
+  currentColor[ledOffset][1] += compare(currentColor[ledOffset][1], targetColor[1]);
+  currentColor[ledOffset][2] += compare(currentColor[ledOffset][2], targetColor[2]);
+
+  displayColor(0, currentColor[ledOffset]);
+
+  delay(FADE_SPEED);
+}
+
+void displayColor(int ledOffset, int targetColor[3]){
+    for(int i=0; i<ledStrip.numPixels(); i++) {
+        ledStrip.setPixelColor(ledOffset, targetColor[0], targetColor[1], targetColor[2]);
+    }
+    ledStrip.show();
+}
+
+int compare(int current, int target) { // this returns a one unit step from current to target
+  if (current < target) return 1;
+  if (current > target) return -1;
+  return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
+
+   checkConnection();
+
    client.loop();
 
    lastState0 = currentState0;
@@ -223,7 +346,7 @@ void handleAsFlower(String emoji) {
   } else if (emoji == HEART) {
     handleHeart();
   } else if (emoji == THUMBS_UP) {
-    handleTHUMBS_UP();
+    handleThumbsUp();
   } else {
     handleUnknown(emoji);
   }
@@ -243,7 +366,7 @@ void handleAsTardis(String emoji) {
 }
 
 void handleUnknown(String payload) {
-  emit("mqtt", "I don't do " + payload);
+  emit("mqtt", name + " doesn't do " + payload);
 }
 
 // Flower handlers /////////////////////////////////////////////////////////////
@@ -256,7 +379,7 @@ void handleHeart() {
   emit("mqtt", "I can handle " + HEART);
 }
 
-void handleTHUMBS_UP() {
+void handleThumbsUp() {
   emit("mqtt", "I can handle " + THUMBS_UP);
 }
 
@@ -264,17 +387,74 @@ void handleTHUMBS_UP() {
 
 void handleClap() {
   emit("mqtt", "I can handle " + CLAP);
+  doTardisFlying();
 }
 
 void handleSmile() {
   emit("mqtt", "I can handle " + SMILE);
+  doTardisLanding();
 }
 
 void handleSad() {
   emit("mqtt",  "I can handle " + SAD);
 }
 
-// Utility Code Starts here ///////////////////////////////////////////////
+void doTardisFlying() {
+  startThemeSong();
+
+  turnMotorOn();
+  while(soundIsPlaying()) {
+  }
+  turnMotorOff();
+}
+
+void doTardisLanding() {
+  startTardisSound();
+
+  while (soundIsPlaying()) {
+    fadeToAndHoldColor(MAIN_LED, WHITE, 0);
+    fadeToAndHoldColor(MAIN_LED, OFF, 0);
+  }
+}
+
+const String DOCTOR_WHO_THEME = "Doctor Who Theme Song";
+const String TARDIS_FLYING_SOUND_EFFECT = "Tardis Flying";
+
+void startThemeSong() {
+  playSound(DOCTOR_WHO_THEME);
+}
+
+void startTardisSound() {
+  playSound(TARDIS_FLYING_SOUND_EFFECT);
+}
+
+// Sound Code //////////////////////////////////////////////////////////////////
+
+void playSound(String sound) {
+  emit("sound", "Playing sound: " + sound); //TODO hook this to mp3 player
+}
+
+bool soundIsPlaying() {
+  bool soundIsPlaying = !switchPressed(SOUND_PIN); //TODO hook this to mp3 player
+  if (!soundIsPlaying) {
+    emit("sound", "sound has stopped.");
+  }
+  return soundIsPlaying;
+}
+
+// Motor Code //////////////////////////////////////////////////////////////////
+
+void turnMotorOn() {
+  emit("motor", "on");
+  digitalWrite(MOTOR_PIN, 1);
+}
+
+void turnMotorOff() {
+  emit("motor", "off");
+  digitalWrite(MOTOR_PIN, 0);
+}
+
+// Utility Code ////////////////////////////////////////////////////////////////
 
 void setupInputPin(int pin) {
   pinMode(pin, INPUT_PULLDOWN);
