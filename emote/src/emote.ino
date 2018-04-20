@@ -1,5 +1,10 @@
 #include <MQTT.h>
 #include <neopixel/neopixel.h>
+#include "log.h"
+#include "emit.h"
+#include "motor.h"
+#include "sound.h"
+#include "switch.h"
 
 const String VERSION = "v0.2.1";
 
@@ -69,8 +74,8 @@ void setup() {
   doConfig();
   setupMQTT();
   setupLEDs();
-  setupSound();
-  setupMotor();
+  setupSound(SOUND_PIN);
+  setupMotor(MOTOR_PIN);
 
   // testLeds(); //TODO remove this after development
 }
@@ -92,14 +97,6 @@ void setupLEDs() {
   }
 }
 
-void setupSound() {
-  pinMode(SOUND_PIN, INPUT_PULLDOWN);
-}
-
-void setupMotor() {
-  pinMode(MOTOR_PIN, OUTPUT);
-  digitalWrite(MOTOR_PIN, 0);
-}
 
 // config //////////////////////////////////////////////////////////////////////
 
@@ -321,10 +318,6 @@ bool switchPressedJustNow(int pin) {
   }
 }
 
-bool switchPressed(int pin) {
-  return digitalRead(pin) == 1;
-}
-
 void mqttEventHandler( char* topic, byte* payload, unsigned int length ) {
   emit("mqtt", "emote event detected");
 
@@ -459,31 +452,7 @@ void playOutro() {
   playSound(DOCTOR_TALKING_OUTRO);
 }
 
-// Sound Code //////////////////////////////////////////////////////////////////
-
-void playSound(String sound) {
-  emit("sound", "Playing sound: " + sound); //TODO hook this to mp3 player
-}
-
-bool soundIsPlaying() {
-  bool soundIsPlaying = !switchPressed(SOUND_PIN); //TODO hook this to mp3 player
-  if (!soundIsPlaying) {
-    emit("sound", "sound has stopped.");
-  }
-  return soundIsPlaying;
-}
-
-// Motor Code //////////////////////////////////////////////////////////////////
-
-void startMotor() {
-  emit("motor", "on");
-  digitalWrite(MOTOR_PIN, 1);
-}
-
-void stopMotor() {
-  emit("motor", "off");
-  digitalWrite(MOTOR_PIN, 0);
-}
+// Rumble Code
 
 void startRumble() {
     emit("rumble", "on");
@@ -505,11 +474,6 @@ void setupSerialConnection() {
   Serial.begin(BAUD_RATE);
 }
 
-void emit(String channel, String message) {
-  Particle.publish(channel, message, PRIVATE);
-  log("Emitted on channel '" + channel + "': " + message);
-}
-
 void waitSeconds(int secondsToWait) {
   logSameLine("Waiting");
   for(int i=0; i<secondsToWait; i++) {
@@ -517,12 +481,4 @@ void waitSeconds(int secondsToWait) {
     logSameLine(".");
   }
   logSameLine("\n");
-}
-
-void logSameLine(String message) {
-  Serial.printf(message);
-}
-
-void log(String message) {
-  Serial.println(message);
 }
