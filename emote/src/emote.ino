@@ -1,7 +1,7 @@
 #include <MQTT.h>
 #include <neopixel/neopixel.h>
 
-const String VERSION = "v0.2.0";
+const String VERSION = "v0.2.1";
 
 const int BAUD_RATE = 115200;
 
@@ -397,15 +397,31 @@ void handleSmile() {
 
 void handleSad() {
   emit("mqtt",  "I can handle " + SAD);
+
+  doTardisStruggle();
+}
+
+void doTardisStruggle() {
+  fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
+  playIntro();
+  fadeToAndHoldColor(SECONDARY_LED, RED, 0);
+  playStruggle();
+  startRumble();
+  while(soundIsPlaying()) {
+  }
+  stopRumble();
+  fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
+  playOutro();
+  fadeToAndHoldColor(SECONDARY_LED, OFF, 0);
 }
 
 void doTardisFlying() {
   startThemeSong();
 
-  turnMotorOn();
+  startMotor();
   while(soundIsPlaying()) {
   }
-  turnMotorOff();
+  stopMotor();
 }
 
 void doTardisLanding() {
@@ -417,6 +433,9 @@ void doTardisLanding() {
   }
 }
 
+const String DOCTOR_TALKING_INTRO = "Doctor Talking Intro";
+const String DALEK_EXTERMINATE = "Dalek Exterminate";
+const String DOCTOR_TALKING_OUTRO = "Doctor Who Outro";
 const String DOCTOR_WHO_THEME = "Doctor Who Theme Song";
 const String TARDIS_FLYING_SOUND_EFFECT = "Tardis Flying";
 
@@ -426,6 +445,18 @@ void startThemeSong() {
 
 void startTardisSound() {
   playSound(TARDIS_FLYING_SOUND_EFFECT);
+}
+
+void playIntro() {
+  playSound(DOCTOR_TALKING_INTRO);
+}
+
+void playStruggle() {
+  playSound(DALEK_EXTERMINATE);
+}
+
+void playOutro() {
+  playSound(DOCTOR_TALKING_OUTRO);
 }
 
 // Sound Code //////////////////////////////////////////////////////////////////
@@ -444,14 +475,24 @@ bool soundIsPlaying() {
 
 // Motor Code //////////////////////////////////////////////////////////////////
 
-void turnMotorOn() {
+void startMotor() {
   emit("motor", "on");
   digitalWrite(MOTOR_PIN, 1);
 }
 
-void turnMotorOff() {
+void stopMotor() {
   emit("motor", "off");
   digitalWrite(MOTOR_PIN, 0);
+}
+
+void startRumble() {
+    emit("rumble", "on");
+    //TODO turn on the rumbler
+}
+
+void stopRumble() {
+    emit("rumble", "off");
+    //TODO turn off the rumbler
 }
 
 // Utility Code ////////////////////////////////////////////////////////////////
