@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v1.0.0";
+const String VERSION = "v1.0.1";
 
 const int BAUD_RATE = 115200;
 
@@ -294,6 +294,7 @@ void handleUnknown(String payload) {
 
 void handlePoop() {
   emit("mqtt", "I can handle " + POOP);
+  oscillate(40,-40,350,10);
 }
 
 void handleHeart() {
