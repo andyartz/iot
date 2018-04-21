@@ -42,7 +42,7 @@ void stepColor(int ledOffset, int targetColor[3]) {
   currentColor[ledOffset][1] += compare(currentColor[ledOffset][1], targetColor[1]);
   currentColor[ledOffset][2] += compare(currentColor[ledOffset][2], targetColor[2]);
 
-  displayColor(0, currentColor[ledOffset]);
+  displayColor(ledOffset, currentColor[ledOffset]);
 
   delay(FADE_SPEED);
 }
