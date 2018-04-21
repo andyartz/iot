@@ -7,8 +7,9 @@
 #include "led.h"
 #include "wait.h"
 #include "pins.h"
+#include "servo.h"
 
-const String VERSION = "v0.2.3";
+const String VERSION = "v0.2.4";
 
 const int BAUD_RATE = 115200;
 
@@ -66,7 +67,7 @@ void setup() {
   setupLEDs(LED_PIN);
   setupSound(SOUND_PIN);
   setupMotor(MOTOR_PIN);
-
+  setupServo();
   // testLeds(); //TODO remove this after development
 }
 
@@ -79,6 +80,7 @@ void setupSwitches() {
 void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
 }
+
 
 // config //////////////////////////////////////////////////////////////////////
 
