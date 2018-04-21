@@ -1,3 +1,3 @@
-void setupSound(int soundPinIn);
-void playSound(String sound);
+void setupSound();
+void playSound(int sound);
 bool soundIsPlaying();

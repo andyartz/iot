@@ -34,11 +34,6 @@ const String THUMBS_UP = ":thumbsup:";
 const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
-// const int ONE_HUNDRED_MILLISECONDS = 100;
-// const int ONE_MILLISECOND = 1;
-// const int ONE_SECOND = 1;
-
-
 const int FLOWER = 0;
 const int TARDIS = 1;
 
@@ -64,7 +59,7 @@ void setup() {
   doConfig();
   setupMQTT();
   setupLEDs(LED_PIN);
-  setupSound(SOUND_PIN);
+  setupSound();
   setupMotor(MOTOR_PIN);
 
   // testLeds(); //TODO remove this after development
@@ -366,11 +361,11 @@ void doTardisLanding() {
   }
 }
 
-const String DOCTOR_TALKING_INTRO = "Doctor Talking Intro";
-const String DALEK_EXTERMINATE = "Dalek Exterminate";
-const String DOCTOR_TALKING_OUTRO = "Doctor Who Outro";
-const String DOCTOR_WHO_THEME = "Doctor Who Theme Song";
-const String TARDIS_FLYING_SOUND_EFFECT = "Tardis Flying";
+const int DOCTOR_WHO_THEME = 1;
+const int TARDIS_FLYING_SOUND_EFFECT = 2;
+const int DOCTOR_TALKING_INTRO = 3;
+const int DALEK_EXTERMINATE = 3;
+const int DOCTOR_TALKING_OUTRO = 3;
 
 void startThemeSong() {
   playSound(DOCTOR_WHO_THEME);
