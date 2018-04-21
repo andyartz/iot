@@ -8,7 +8,7 @@
 #include "wait.h"
 #include "pins.h"
 
-const String VERSION = "v0.2.2";
+const String VERSION = "v0.2.3";
 
 const int BAUD_RATE = 115200;
 
