@@ -17,8 +17,8 @@ const String THINGSPEAK_MQTT_API_KEY = "KJD6QV2N7PJ2YM7K";
 
 const String OUTBOUND_EVENTS_WEBHOOK_NAME = "twilio";
 
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_FLOWER = "467440";
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_FLOWER = "80HXPU3QJX8H7CJF";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG = "467440";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG = "80HXPU3QJX8H7CJF";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS = "469924";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS = "EKTNY1SLEPZ4A9CM";
 
@@ -39,7 +39,7 @@ const String SMILE = ":smile:";
 // const int ONE_SECOND = 1;
 
 
-const int FLOWER = 0;
+const int DOG = 0;
 const int TARDIS = 1;
 
 int config = 0;
@@ -87,9 +87,9 @@ void doConfig() {
   setupInputPin(REMOTE_CONFIG_PIN);
   config = digitalRead(REMOTE_CONFIG_PIN);
 
-  if (isFlower()) {
-    name = "Flower";
-    emit("config", "Device is a flower. Name is " + name);
+  if (isDOG()) {
+    name = "DOG";
+    emit("config", "Device is a DOG. Name is " + name);
   } else if (isTardis()) {
     name = "Tardis";
     emit("config", "Device is a Tardis. Name is " + name);
@@ -98,8 +98,8 @@ void doConfig() {
   }
 }
 
-bool isFlower() {
-  return config == FLOWER;
+bool isDOG() {
+  return config == DOG;
 }
 
 bool isTardis() {
@@ -141,8 +141,8 @@ String getThingspeakReadChannel() {
 }
 
 String getChannelNumber() {
-  if (isFlower()) {
-    return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_FLOWER;
+  if (isDOG()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS;
   } else {
@@ -156,8 +156,8 @@ String getChannel() {
 }
 
 String getApiKey() {
-  if (isFlower()) {
-    return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_FLOWER;
+  if (isDOG()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS;
   } else {
@@ -223,7 +223,7 @@ void loop() {
    if (switchPressedJustNow(SWITCH_PIN_0)) {
      if (isTardis()) {
        send(HEART);
-     } else if (isFlower()) {
+     } else if (isDOG()) {
        send(SMILE);
      }
    }
@@ -231,7 +231,7 @@ void loop() {
   if (switchPressedJustNow(SWITCH_PIN_1)) {
     if (isTardis()) {
       send(THUMBS_UP);
-    } else if (isFlower()) {
+    } else if (isDOG()) {
       send(CLAP);
     }
   }
@@ -239,7 +239,7 @@ void loop() {
   if (switchPressedJustNow(SWITCH_PIN_2)) {
     if (isTardis()) {
       send(POOP);
-    } else if (isFlower()) {
+    } else if (isDOG()) {
       send(SAD);
     }
   }
@@ -265,14 +265,14 @@ void mqttEventHandler( char* topic, byte* payload, unsigned int length ) {
     memcpy( emoji, payload, length );
     emoji[ length ] = NULL;  // Terminate the string.
 
-    if (isFlower()) {
-      handleAsFlower(emoji);
+    if (isDOG()) {
+      handleAsDOG(emoji);
     } else if (isTardis()) {
       handleAsTardis(emoji);
     }
 }
 
-void handleAsFlower(String emoji) {
+void handleAsDOG(String emoji) {
 
   if (emoji == POOP) {
     handlePoop();
@@ -302,7 +302,7 @@ void handleUnknown(String payload) {
   emit("mqtt", name + " doesn't do " + payload);
 }
 
-// Flower handlers /////////////////////////////////////////////////////////////
+// DOG handlers /////////////////////////////////////////////////////////////
 
 void handlePoop() {
   emit("mqtt", "I can handle " + POOP);
