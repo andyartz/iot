@@ -323,16 +323,16 @@ void handleSad() {
 }
 
 void doTardisStruggle() {
-  fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
-  playIntro();
+  // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
+  // playIntro();
   fadeToAndHoldColor(SECONDARY_LED, RED, 0);
   playStruggle();
   startRumble();
   while(soundIsPlaying()) {
   }
   stopRumble();
-  fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
-  playOutro();
+  // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
+  // playOutro();
   fadeToAndHoldColor(SECONDARY_LED, OFF, 0);
 }
 
@@ -354,8 +354,8 @@ void doTardisLanding() {
   }
 }
 
-const int DOCTOR_WHO_THEME = 0;
-const int TARDIS_FLYING_SOUND_EFFECT = 1;
+const int TARDIS_FLYING_SOUND_EFFECT = 0;
+const int DOCTOR_WHO_THEME = 1;
 const int DOCTOR_TALKING_INTRO = 2;
 const int DALEK_EXTERMINATE = 2;
 const int DOCTOR_TALKING_OUTRO = 2;
