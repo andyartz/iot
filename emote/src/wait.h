@@ -1,0 +1,1 @@
+void waitSeconds(int secondsToWait);

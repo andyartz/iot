@@ -1,12 +1,14 @@
 #include <MQTT.h>
-#include <neopixel/neopixel.h>
 #include "log.h"
 #include "emit.h"
 #include "motor.h"
 #include "sound.h"
 #include "switch.h"
+#include "led.h"
+#include "wait.h"
+#include "pins.h"
 
-const String VERSION = "v0.2.1";
+const String VERSION = "v0.2.2";
 
 const int BAUD_RATE = 115200;
 
@@ -24,15 +26,6 @@ const String EMOTE_EVENT_THINGSPEAK_CHANNEL_FIELD = "field1";
 
 const int THINGSPEAK_MQTT_PORT = 1883;
 
-// Pins ////////////////////////////////////////////////////////////////////////
-const int REMOTE_CONFIG_PIN = D0;
-const int SOUND_PIN = D1;
-const int MOTOR_PIN = D2;
-const int LED_PIN = D3;
-const int SWITCH_PIN_0 = A0;
-const int SWITCH_PIN_1 = A1;
-const int SWITCH_PIN_2 = A2;
-
 // Emoji ///////////////////////////////////////////////////////////////////////
 const String POOP = ":poop:";
 const String HEART = ":heart:";
@@ -41,12 +34,10 @@ const String THUMBS_UP = ":thumbsup:";
 const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
-const int ONE_SECOND_IN_MILLIS = 1000;
-const int ONE_HUNDRED_MILLISECONDS = 100;
-const int ONE_MILLISECOND = 1;
-const int ONE_SECOND = 1;
+// const int ONE_HUNDRED_MILLISECONDS = 100;
+// const int ONE_MILLISECOND = 1;
+// const int ONE_SECOND = 1;
 
-const int NUMBER_OF_LEDS = 1;
 
 const int FLOWER = 0;
 const int TARDIS = 1;
@@ -63,7 +54,6 @@ bool lastState2 = FALSE;
 bool currentState2 = FALSE;
 
 MQTT client("mqtt.thingspeak.com", THINGSPEAK_MQTT_PORT, mqttEventHandler);
-Adafruit_NeoPixel ledStrip = Adafruit_NeoPixel(NUMBER_OF_LEDS, LED_PIN, WS2812);
 
 void setup() {
 
@@ -73,7 +63,7 @@ void setup() {
   setupSerialConnection();
   doConfig();
   setupMQTT();
-  setupLEDs();
+  setupLEDs(LED_PIN);
   setupSound(SOUND_PIN);
   setupMotor(MOTOR_PIN);
 
@@ -89,14 +79,6 @@ void setupSwitches() {
 void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
 }
-
-void setupLEDs() {
-  ledStrip.begin();
-  for (int i=0; i<NUMBER_OF_LEDS; i++) {
-    turnOffLed(i);
-  }
-}
-
 
 // config //////////////////////////////////////////////////////////////////////
 
@@ -129,7 +111,7 @@ bool isTardis() {
 void setupMQTT() {
     client.connect( name, THINGSPEAK_USERNAME, THINGSPEAK_MQTT_API_KEY, NULL, MQTT::QOS0, 0, NULL, true);
 
-    delay( ONE_SECOND_IN_MILLIS );
+    waitSeconds(1);
 
     if ( client.isConnected() ) {
       String subscribed = subscribeToMQTT();
@@ -186,12 +168,12 @@ String getApiKey() {
 
 // LED Code ////////////////////////////////////////////////////////////////////
 
-const int BLINK_TIME = ONE_HUNDRED_MILLISECONDS;
-const int FADE_SPEED = 5 * ONE_MILLISECOND;
-const int COLOR_HOLD_TIME = ONE_SECOND;
-
-const int MAIN_LED = 0;
-const int SECONDARY_LED = 1;
+// const int BLINK_TIME = ONE_HUNDRED_MILLISECONDS;
+// const int FADE_SPEED = 5 * ONE_MILLISECOND;
+// const int COLOR_HOLD_TIME = ONE_SECOND;
+//
+// const int MAIN_LED = 0;
+// const int SECONDARY_LED = 1;
 
 int RED[3] = {255, 0, 0};
 int GREEN[3] = {0, 255, 0};
@@ -203,7 +185,7 @@ int WHITE[3] = {255, 255, 255};
 int OFF_WHITE[3] = {255, 255, 80};
 int OFF[3] = {0, 0, 0};
 
-int currentColor[2][3] = {{0,0,0}, {0,0,0}};
+// int currentColor[2][3] = {{0,0,0}, {0,0,0}};
 
 void testLeds() {
   emit("testing leds", "testing...");
@@ -222,48 +204,6 @@ void testLed(int led) {
   fadeToAndHoldColor(led, MAGENTA, ONE_SECOND);
   fadeToAndHoldColor(led, YELLOW, ONE_SECOND);
   fadeToAndHoldColor(led, OFF, ONE_SECOND);
-}
-
-void turnOffLed(int ledOffset) {
-  displayColor(ledOffset, OFF);
-}
-
-void fadeToAndHoldColor(int ledOffset, int targetColor[3], int secondsToHold) {
-  fadeToColor(ledOffset, targetColor);
-  waitSeconds(secondsToHold);
-}
-
-void fadeToColor(int ledOffset, int targetColor[3]) {
-  while(!isColor(ledOffset, targetColor)) {
-    stepColor(ledOffset, targetColor);
-  }
-}
-
-bool isColor(int ledOffset, int targetColor[3]) {
-  return currentColor[ledOffset][0] == targetColor[0] && currentColor[ledOffset][1] == targetColor[1] && currentColor[ledOffset][2] == targetColor[2];
-}
-
-void stepColor(int ledOffset, int targetColor[3]) {
-  currentColor[ledOffset][0] += compare(currentColor[ledOffset][0], targetColor[0]);
-  currentColor[ledOffset][1] += compare(currentColor[ledOffset][1], targetColor[1]);
-  currentColor[ledOffset][2] += compare(currentColor[ledOffset][2], targetColor[2]);
-
-  displayColor(0, currentColor[ledOffset]);
-
-  delay(FADE_SPEED);
-}
-
-void displayColor(int ledOffset, int targetColor[3]){
-    for(int i=0; i<ledStrip.numPixels(); i++) {
-        ledStrip.setPixelColor(ledOffset, targetColor[0], targetColor[1], targetColor[2]);
-    }
-    ledStrip.show();
-}
-
-int compare(int current, int target) { // this returns a one unit step from current to target
-  if (current < target) return 1;
-  if (current > target) return -1;
-  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -472,13 +412,4 @@ void setupInputPin(int pin) {
 
 void setupSerialConnection() {
   Serial.begin(BAUD_RATE);
-}
-
-void waitSeconds(int secondsToWait) {
-  logSameLine("Waiting");
-  for(int i=0; i<secondsToWait; i++) {
-    delay(ONE_SECOND_IN_MILLIS);
-    logSameLine(".");
-  }
-  logSameLine("\n");
 }
