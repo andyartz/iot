@@ -7,8 +7,9 @@
 #include "led.h"
 #include "wait.h"
 #include "pins.h"
+#include "servo.h"
 
-const String VERSION = "v0.2.2";
+const String VERSION = "v1.0.0";
 
 const int BAUD_RATE = 115200;
 
@@ -17,8 +18,8 @@ const String THINGSPEAK_MQTT_API_KEY = "KJD6QV2N7PJ2YM7K";
 
 const String OUTBOUND_EVENTS_WEBHOOK_NAME = "twilio";
 
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_FLOWER = "467440";
-const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_FLOWER = "80HXPU3QJX8H7CJF";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG = "467440";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG = "80HXPU3QJX8H7CJF";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS = "469924";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS = "EKTNY1SLEPZ4A9CM";
 
@@ -34,7 +35,7 @@ const String THUMBS_UP = ":thumbsup:";
 const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
-const int FLOWER = 0;
+const int DOG = 0;
 const int TARDIS = 1;
 
 int config = 0;
@@ -61,7 +62,7 @@ void setup() {
   setupLEDs(LED_PIN);
   setupSound();
   setupMotor(MOTOR_PIN);
-
+  setupServo();
   // testLeds(); //TODO remove this after development
 }
 
@@ -75,16 +76,17 @@ void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
 }
 
+
 // config //////////////////////////////////////////////////////////////////////
 
 void doConfig() {
 
-  setupInputPin(REMOTE_CONFIG_PIN);
-  config = digitalRead(REMOTE_CONFIG_PIN);
+  setupInputPin(CONFIG_PIN);
+  config = digitalRead(CONFIG_PIN);
 
-  if (isFlower()) {
-    name = "Flower";
-    emit("config", "Device is a flower. Name is " + name);
+  if (isDog()) {
+    name = "Dog";
+    emit("config", "Device is a Dog. Name is " + name);
   } else if (isTardis()) {
     name = "Tardis";
     emit("config", "Device is a Tardis. Name is " + name);
@@ -93,8 +95,8 @@ void doConfig() {
   }
 }
 
-bool isFlower() {
-  return config == FLOWER;
+bool isDog() {
+  return config == DOG;
 }
 
 bool isTardis() {
@@ -136,8 +138,8 @@ String getThingspeakReadChannel() {
 }
 
 String getChannelNumber() {
-  if (isFlower()) {
-    return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_FLOWER;
+  if (isDog()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS;
   } else {
@@ -151,8 +153,8 @@ String getChannel() {
 }
 
 String getApiKey() {
-  if (isFlower()) {
-    return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_FLOWER;
+  if (isDog()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS;
   } else {
@@ -163,13 +165,6 @@ String getApiKey() {
 
 // LED Code ////////////////////////////////////////////////////////////////////
 
-// const int BLINK_TIME = ONE_HUNDRED_MILLISECONDS;
-// const int FADE_SPEED = 5 * ONE_MILLISECOND;
-// const int COLOR_HOLD_TIME = ONE_SECOND;
-//
-// const int MAIN_LED = 0;
-// const int SECONDARY_LED = 1;
-
 int RED[3] = {255, 0, 0};
 int GREEN[3] = {0, 255, 0};
 int BLUE[3] = {0, 0, 255};
@@ -179,8 +174,6 @@ int MAGENTA[3] = {255, 0, 255};
 int WHITE[3] = {255, 255, 255};
 int OFF_WHITE[3] = {255, 255, 80};
 int OFF[3] = {0, 0, 0};
-
-// int currentColor[2][3] = {{0,0,0}, {0,0,0}};
 
 void testLeds() {
   emit("testing leds", "testing...");
@@ -218,7 +211,7 @@ void loop() {
    if (switchPressedJustNow(SWITCH_PIN_0)) {
      if (isTardis()) {
        send(HEART);
-     } else if (isFlower()) {
+     } else if (isDog()) {
        send(SMILE);
      }
    }
@@ -226,7 +219,7 @@ void loop() {
   if (switchPressedJustNow(SWITCH_PIN_1)) {
     if (isTardis()) {
       send(THUMBS_UP);
-    } else if (isFlower()) {
+    } else if (isDog()) {
       send(CLAP);
     }
   }
@@ -234,7 +227,7 @@ void loop() {
   if (switchPressedJustNow(SWITCH_PIN_2)) {
     if (isTardis()) {
       send(POOP);
-    } else if (isFlower()) {
+    } else if (isDog()) {
       send(SAD);
     }
   }
@@ -260,14 +253,14 @@ void mqttEventHandler( char* topic, byte* payload, unsigned int length ) {
     memcpy( emoji, payload, length );
     emoji[ length ] = NULL;  // Terminate the string.
 
-    if (isFlower()) {
-      handleAsFlower(emoji);
+    if (isDog()) {
+      handleAsDOG(emoji);
     } else if (isTardis()) {
       handleAsTardis(emoji);
     }
 }
 
-void handleAsFlower(String emoji) {
+void handleAsDOG(String emoji) {
 
   if (emoji == POOP) {
     handlePoop();
@@ -297,7 +290,7 @@ void handleUnknown(String payload) {
   emit("mqtt", name + " doesn't do " + payload);
 }
 
-// Flower handlers /////////////////////////////////////////////////////////////
+// DOG handlers /////////////////////////////////////////////////////////////
 
 void handlePoop() {
   emit("mqtt", "I can handle " + POOP);
@@ -361,11 +354,11 @@ void doTardisLanding() {
   }
 }
 
-const int DOCTOR_WHO_THEME = 1;
-const int TARDIS_FLYING_SOUND_EFFECT = 2;
-const int DOCTOR_TALKING_INTRO = 3;
-const int DALEK_EXTERMINATE = 3;
-const int DOCTOR_TALKING_OUTRO = 3;
+const int DOCTOR_WHO_THEME = 0;
+const int TARDIS_FLYING_SOUND_EFFECT = 1;
+const int DOCTOR_TALKING_INTRO = 2;
+const int DALEK_EXTERMINATE = 2;
+const int DOCTOR_TALKING_OUTRO = 2;
 
 void startThemeSong() {
   playSound(DOCTOR_WHO_THEME);
@@ -387,7 +380,7 @@ void playOutro() {
   playSound(DOCTOR_TALKING_OUTRO);
 }
 
-// Rumble Code
+// Rumble Code /////////////////////////////////////////////////////////////////
 
 void startRumble() {
     emit("rumble", "on");

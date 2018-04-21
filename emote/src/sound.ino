@@ -4,10 +4,17 @@
 #include "pins.h"
 
 void setupSound() {
+
   pinMode(SOUND_PIN_0, OUTPUT);
+  digitalWrite(SOUND_PIN_0, 1);
+
   pinMode(SOUND_PIN_1, OUTPUT);
+  digitalWrite(SOUND_PIN_1, 1);
+
   pinMode(SOUND_PIN_2, OUTPUT);
-  pinMode(SOUND_ACTIVE_PIN, INPUT_PULLDOWN);
+  digitalWrite(SOUND_PIN_2, 1);
+
+  pinMode(SOUND_ACTIVE_PIN, INPUT_PULLUP);
 }
 
 void playSound(int sound) {
@@ -23,10 +30,10 @@ void playSound(int sound) {
 
   emit("sound", "Playing sound on pin: " + String(currentPin));
 
-  digitalWrite(currentPin, 1);
-  while(!soundIsPlaying) {
-  }
   digitalWrite(currentPin, 0);
+  while(!soundIsPlaying()) {
+  }
+  digitalWrite(currentPin, 1);
 }
 
 bool soundIsPlaying() {
