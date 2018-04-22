@@ -15,11 +15,10 @@ void setupLEDs(int ledPin) {
   }
 }
 
-
 void turnOffLed(int ledOffset) {
-  int OFF[3] = {0, 0, 0};
+  int COLOR_OFF[3] = {0, 0, 0};
 
-  displayColor(ledOffset, OFF);
+  displayColor(ledOffset, COLOR_OFF);
 }
 
 void fadeToAndHoldColor(int ledOffset, int targetColor[3], int secondsToHold) {

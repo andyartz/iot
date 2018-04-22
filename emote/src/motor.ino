@@ -1,20 +1,21 @@
 #include "motor.h"
 #include "emit.h"
+#include "PowerFunctions.h"
+#include "pins.h"
 
-int motorPin;
+int output = RED;
 
-void setupMotor(int motorPinIn) {
-  motorPin = motorPinIn;
-  pinMode(motorPin, OUTPUT);
-  digitalWrite(motorPin, 0);
-}
+PowerFunctions pf(INFRARED_PIN, 0);
 
 void startMotor() {
   emit("motor", "on");
-  digitalWrite(motorPin, 1);
+  pf.single_pwm(output, PWM_FWD7);
 }
 
 void stopMotor() {
   emit("motor", "off");
-  digitalWrite(motorPin, 0);
+
+  pf.single_pwm(output, PWM_BRK);
+  delay(30);
+  pf.single_pwm(output, PWM_FLT);
 }

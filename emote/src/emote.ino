@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v1.0.1";
+const String VERSION = "v1.0.2";
 
 const int BAUD_RATE = 115200;
 
@@ -61,7 +61,6 @@ void setup() {
   setupMQTT();
   setupLEDs(LED_PIN);
   setupSound();
-  setupMotor(MOTOR_PIN);
   setupServo();
   // testLeds(); //TODO remove this after development
 }
@@ -75,7 +74,6 @@ void setupSwitches() {
 void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
 }
-
 
 // config //////////////////////////////////////////////////////////////////////
 
@@ -165,15 +163,15 @@ String getApiKey() {
 
 // LED Code ////////////////////////////////////////////////////////////////////
 
-int RED[3] = {255, 0, 0};
-int GREEN[3] = {0, 255, 0};
-int BLUE[3] = {0, 0, 255};
-int YELLOW[3] = {255, 255, 0};
-int CYAN[3] = {0, 255, 255};
-int MAGENTA[3] = {255, 0, 255};
-int WHITE[3] = {255, 255, 255};
-int OFF_WHITE[3] = {255, 255, 80};
-int OFF[3] = {0, 0, 0};
+int COLOR_RED[3] = {255, 0, 0};
+int COLOR_GREEN[3] = {0, 255, 0};
+int COLOR_BLUE[3] = {0, 0, 255};
+int COLOR_YELLOW[3] = {255, 255, 0};
+int COLOR_CYAN[3] = {0, 255, 255};
+int COLOR_MAGENTA[3] = {255, 0, 255};
+int COLOR_WHITE[3] = {255, 255, 255};
+int COLOR_OFF_WHITE[3] = {255, 255, 80};
+int COLOR_OFF[3] = {0, 0, 0};
 
 void testLeds() {
   emit("testing leds", "testing...");
@@ -184,14 +182,14 @@ void testLeds() {
 }
 
 void testLed(int led) {
-  fadeToAndHoldColor(led, WHITE, ONE_SECOND);
-  fadeToAndHoldColor(led, RED, ONE_SECOND);
-  fadeToAndHoldColor(led, GREEN, ONE_SECOND);
-  fadeToAndHoldColor(led, BLUE, ONE_SECOND);
-  fadeToAndHoldColor(led, CYAN, ONE_SECOND);
-  fadeToAndHoldColor(led, MAGENTA, ONE_SECOND);
-  fadeToAndHoldColor(led, YELLOW, ONE_SECOND);
-  fadeToAndHoldColor(led, OFF, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_WHITE, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_RED, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_GREEN, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_BLUE, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_CYAN, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_MAGENTA, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_YELLOW, ONE_SECOND);
+  fadeToAndHoldColor(led, COLOR_OFF, ONE_SECOND);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,6 +229,7 @@ void loop() {
       send(SAD);
     }
   }
+
   waitSeconds(1);
 }
 
@@ -326,7 +325,7 @@ void handleSad() {
 void doTardisStruggle() {
   // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
   // playIntro();
-  fadeToAndHoldColor(SECONDARY_LED, RED, 0);
+  fadeToAndHoldColor(SECONDARY_LED, COLOR_RED, 0);
   playStruggle();
   startRumble();
   while(soundIsPlaying()) {
@@ -334,7 +333,7 @@ void doTardisStruggle() {
   stopRumble();
   // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
   // playOutro();
-  fadeToAndHoldColor(SECONDARY_LED, OFF, 0);
+  fadeToAndHoldColor(SECONDARY_LED, COLOR_OFF, 0);
 }
 
 void doTardisFlying() {
@@ -350,8 +349,8 @@ void doTardisLanding() {
   startTardisSound();
 
   while (soundIsPlaying()) {
-    fadeToAndHoldColor(MAIN_LED, WHITE, 0);
-    fadeToAndHoldColor(MAIN_LED, OFF, 0);
+    fadeToAndHoldColor(MAIN_LED, COLOR_WHITE, 0);
+    fadeToAndHoldColor(MAIN_LED, COLOR_OFF, 0);
   }
 }
 
@@ -385,12 +384,12 @@ void playOutro() {
 
 void startRumble() {
     emit("rumble", "on");
-    //TODO turn on the rumbler
+    digitalWrite(RUMBLE_PIN, 1);
 }
 
 void stopRumble() {
     emit("rumble", "off");
-    //TODO turn off the rumbler
+    digitalWrite(RUMBLE_PIN, 0);
 }
 
 // Utility Code ////////////////////////////////////////////////////////////////
