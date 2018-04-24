@@ -14,7 +14,7 @@ void displayColor(int ledOffset, int targetColor[3]);
 
 int compare(int current, int target);
 
-const int NUMBER_OF_LEDS = 1;
+const int NUMBER_OF_LEDS = 2;
 
 const int ONE_HUNDRED_MILLISECONDS = 100;
 const int ONE_MILLISECOND = 1;

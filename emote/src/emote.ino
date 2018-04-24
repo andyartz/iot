@@ -62,7 +62,7 @@ void setup() {
   setupLEDs(LED_PIN);
   setupSound();
   setupServo();
-  // testLeds(); //TODO remove this after development
+  testLeds(); //TODO remove this after development
 }
 
 void setupSwitches() {
@@ -302,6 +302,18 @@ void handleHeart() {
 
 void handleThumbsUp() {
   emit("mqtt", "I can handle " + THUMBS_UP);
+}
+
+void doDogPoop() {
+
+}
+
+void doDogHeart() {
+
+}
+
+void doDogThumbsUp() {
+
 }
 
 // Tardis handlers /////////////////////////////////////////////////////////////
