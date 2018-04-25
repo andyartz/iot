@@ -318,6 +318,18 @@ void handleThumbsUp() {
   emit("mqtt", "I can handle " + THUMBS_UP);
 }
 
+void doDogPoop() {
+
+}
+
+void doDogHeart() {
+
+}
+
+void doDogThumbsUp() {
+
+}
+
 // Tardis handlers /////////////////////////////////////////////////////////////
 
 void handleClap() {
