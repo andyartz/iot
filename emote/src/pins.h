@@ -2,7 +2,8 @@ const int SWITCH_PIN_0 = A0;
 const int SWITCH_PIN_1 = A1;
 const int SWITCH_PIN_2 = A2;
 
-const int CONFIG_PIN = A5;
+const int CONFIG_PIN_1 = A4;
+const int CONFIG_PIN_0 = A5;
 
 const int LED_PIN = D0;
 const int RUMBLE_PIN = D1;

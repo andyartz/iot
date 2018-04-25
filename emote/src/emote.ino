@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v2.0.2";
+const String VERSION = "v2.0.7";
 
 const int BAUD_RATE = 115200;
 
@@ -22,6 +22,8 @@ const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG = "467440";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG = "80HXPU3QJX8H7CJF";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS = "469924";
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS = "EKTNY1SLEPZ4A9CM";
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS_BASE = "469924"; //TODO new channel?
+const String EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS_BASE = "EKTNY1SLEPZ4A9CM"; // new key?
 
 const String EMOTE_EVENT_THINGSPEAK_CHANNEL_FIELD = "field1";
 
@@ -35,6 +37,7 @@ const String THUMBS_UP = ":thumbsup:";
 const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
+const int TARDIS_BASE = 2;
 const int DOG = 1;
 const int TARDIS = 0;
 
@@ -90,8 +93,10 @@ void testRumble() {
 
 void doConfig() {
 
-  setupInputPin(CONFIG_PIN);
-  config = digitalRead(CONFIG_PIN);
+  setupInputPin(CONFIG_PIN_0);
+  setupInputPin(CONFIG_PIN_1);
+
+  config = digitalRead(CONFIG_PIN_0) + (2*digitalRead(CONFIG_PIN_1));
 
   if (isDog()) {
     name = "Dog";
@@ -99,6 +104,9 @@ void doConfig() {
   } else if (isTardis()) {
     name = "Tardis";
     emit("config", "Device is a Tardis. Name is " + name);
+  } else if (isTardisBase()) {
+    name = "Tardis Base";
+    emit("config", "Device is a Tardis Base. Name is " + name);
   } else {
     emit("error", "ERROR! Device has no configuration: " + config );
   }
@@ -110,6 +118,10 @@ bool isDog() {
 
 bool isTardis() {
   return config == TARDIS;
+}
+
+bool isTardisBase() {
+  return config == TARDIS_BASE;
 }
 
 // Thingspeak Publish/Subscribe ////////////////////////////////////////////////
@@ -154,6 +166,8 @@ String getChannelNumber() {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS;
+  } else if (isTardisBase()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_NUMBER_TARDIS_BASE;
   } else {
     emit("error", "No Channel Number is available for config: " + config);
     return "";
@@ -169,6 +183,8 @@ String getApiKey() {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_DOG;
   } else if (isTardis()) {
     return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS;
+  } else if (isTardisBase()) {
+    return EMOTE_EVENT_THINGSPEAK_CHANNEL_API_READ_KEY_TARDIS_BASE;
   } else {
     emit("error", "No API Key is available for config: " + config);
     return "";
@@ -270,6 +286,8 @@ void mqttEventHandler( char* topic, byte* payload, unsigned int length ) {
       handleAsDOG(emoji);
     } else if (isTardis()) {
       handleAsTardis(emoji);
+    } else if (isTardisBase()) {
+      handleAsTardisBase(emoji);
     }
 }
 
@@ -289,11 +307,30 @@ void handleAsDOG(String emoji) {
 void handleAsTardis(String emoji) {
 
   if (emoji == CLAP) {
-    handleClap();
+    emit("mqtt", "I can handle " + CLAP);
+    doTardisFlying();
   } else if (emoji == SMILE) {
-    handleSmile();
+    emit("mqtt", "I can handle " + SMILE);
+    doTardisLanding();
   } else if (emoji == SAD) {
-    handleSad();
+    emit("mqtt",  "I can handle " + SAD);
+    doTardisStruggle();
+  } else {
+    handleUnknown(emoji);
+  }
+}
+
+void handleAsTardisBase(String emoji) {
+
+  if (emoji == CLAP) {
+    emit("mqtt", "I can handle " + CLAP);
+    doTardisBaseFlying();
+  } else if (emoji == SMILE) {
+    emit("mqtt", "I can handle " + SMILE);
+    doTardisBaseLanding();
+  } else if (emoji == SAD) {
+    emit("mqtt",  "I can handle " + SAD);
+    doTardisBaseStruggle();
   } else {
     handleUnknown(emoji);
   }
@@ -332,90 +369,69 @@ void doDogThumbsUp() {
 
 // Tardis handlers /////////////////////////////////////////////////////////////
 
-void handleClap() {
-  emit("mqtt", "I can handle " + CLAP);
-  doTardisFlying();
-}
+int TARDIS_LIGHT = MAIN_LED;
+const int TARDIS_BREAKING_SOUND_EFFECT = 0;
+const int DOCTOR_WHO_THEME = 1;
+const int TARDIS_FLYING_SOUND_EFFECT = 2;
 
-void handleSmile() {
-  emit("mqtt", "I can handle " + SMILE);
-  doTardisLanding();
-}
-
-void handleSad() {
-  emit("mqtt",  "I can handle " + SAD);
-
-  doTardisStruggle();
-}
+// frowning
 
 void doTardisStruggle() {
-  // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
-  // playIntro();
-  fadeToAndHoldColor(SECONDARY_LED, COLOR_RED, 0);
-  playStruggle();
-  startRumble();
-  while(soundIsPlaying()) {
-  }
-  stopRumble();
-  // fadeToAndHoldColor(SECONDARY_LED, WHITE, 0);
-  // playOutro();
-  fadeToAndHoldColor(SECONDARY_LED, COLOR_OFF, 0);
+  fadeToAndHoldColor(TARDIS_LIGHT, COLOR_RED, 10);
+  fadeToAndHoldColor(TARDIS_LIGHT, COLOR_OFF, 0);
 }
 
-void doTardisFlying() {
-  startThemeSong();
+void doTardisBaseStruggle() {
+  playSound(TARDIS_BREAKING_SOUND_EFFECT);
+  for(int i=0; i<4; i++) {
+    startMotor();
+    waitSeconds(1);
+    stopMotor();
+    waitSeconds(0);
+  }
+  while(soundIsPlaying()) {
+  }
+}
 
+// clap
+
+void doTardisFlying() {
+  waitSeconds(16);
+}
+
+void doTardisBaseFlying() {
+  playSound(DOCTOR_WHO_THEME);
   startMotor();
   while(soundIsPlaying()) {
   }
   stopMotor();
 }
 
-void doTardisLanding() {
-  startTardisSound();
+// smile
 
-  while (soundIsPlaying()) {
-    fadeToAndHoldColor(MAIN_LED, COLOR_WHITE, 0);
-    fadeToAndHoldColor(MAIN_LED, COLOR_OFF, 0);
+void doTardisLanding() {
+  for (int i=0; i<7; i++) {
+    fadeToAndHoldColor(TARDIS_LIGHT, COLOR_WHITE, 0);
+    fadeToAndHoldColor(TARDIS_LIGHT, COLOR_OFF, 0);
   }
 }
 
-const int TARDIS_FLYING_SOUND_EFFECT = 0;
-const int DOCTOR_WHO_THEME = 1;
-const int DOCTOR_TALKING_INTRO = 2;
-const int DALEK_EXTERMINATE = 2;
-const int DOCTOR_TALKING_OUTRO = 2;
-
-void startThemeSong() {
-  playSound(DOCTOR_WHO_THEME);
-}
-
-void startTardisSound() {
+void doTardisBaseLanding() {
   playSound(TARDIS_FLYING_SOUND_EFFECT);
-}
-
-void playIntro() {
-  playSound(DOCTOR_TALKING_INTRO);
-}
-
-void playStruggle() {
-  playSound(DALEK_EXTERMINATE);
-}
-
-void playOutro() {
-  playSound(DOCTOR_TALKING_OUTRO);
+  while(soundIsPlaying()) {
+  }
 }
 
 // Rumble Code /////////////////////////////////////////////////////////////////
 
 void startRumble() {
-    emit("rumble", "on");
-    digitalWrite(RUMBLE_PIN, 1);
+  emit("rumble", "on");
+  digitalWrite(RUMBLE_PIN, 1);
 }
 
 void stopRumble() {
-    emit("rumble", "off");
-    digitalWrite(RUMBLE_PIN, 0);
+  emit("rumble", "off");
+  digitalWrite(RUMBLE_PIN, 0);
 }
 
 // Utility Code ////////////////////////////////////////////////////////////////

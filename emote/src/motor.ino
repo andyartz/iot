@@ -9,7 +9,7 @@ PowerFunctions pf(INFRARED_PIN, 0);
 
 void startMotor() {
   emit("motor", "on");
-  pf.single_pwm(output, PWM_FWD7);
+  pf.single_pwm(output, PWM_FWD4);
 }
 
 void stopMotor() {
