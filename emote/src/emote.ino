@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v1.0.2";
+const String VERSION = "v2.0.2";
 
 const int BAUD_RATE = 115200;
 
@@ -35,8 +35,8 @@ const String THUMBS_UP = ":thumbsup:";
 const String CLAP = ":clap:";
 const String SMILE = ":smile:";
 
-const int DOG = 0;
-const int TARDIS = 1;
+const int DOG = 1;
+const int TARDIS = 0;
 
 int config = 0;
 String name = "none";
@@ -63,6 +63,8 @@ void setup() {
   setupSound();
   setupServo();
   // testLeds(); //TODO remove this after development
+  setupRumble();
+  testRumble();
 }
 
 void setupSwitches() {
@@ -75,6 +77,15 @@ void setupSwitch(int switchPin) {
   pinMode(switchPin, INPUT_PULLDOWN);
 }
 
+void setupRumble() {
+    pinMode(RUMBLE_PIN, OUTPUT);
+}
+
+void testRumble() {
+  startRumble();
+  waitSeconds(1);
+  stopRumble();
+}
 // config //////////////////////////////////////////////////////////////////////
 
 void doConfig() {
@@ -129,6 +140,9 @@ String subscribeToMQTT() {
 
 void send(String message) {
   emit(OUTBOUND_EVENTS_WEBHOOK_NAME, message);
+  startRumble();
+  waitSeconds(1);
+  stopRumble();
 }
 
 String getThingspeakReadChannel() {

@@ -6,8 +6,8 @@ const int CONFIG_PIN = A5;
 
 const int LED_PIN = D0;
 const int RUMBLE_PIN = D1;
-const int SERVO_PIN = D3;
 const int SOUND_PIN_0 = D2;
+const int SERVO_PIN = D3;
 const int SOUND_PIN_1 = D4;
 const int SOUND_PIN_2 = D5;
 const int SOUND_ACTIVE_PIN = D6;
