@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v2.0.7";
+const String VERSION = "v2.0.9";
 
 const int BAUD_RATE = 115200;
 
@@ -341,6 +341,8 @@ void handleUnknown(String payload) {
 }
 
 // DOG handlers /////////////////////////////////////////////////////////////
+int DOG_LIGHT = MAIN_LED;
+
 
 void handlePoop() {
   emit("mqtt", "I can handle " + POOP);
@@ -349,22 +351,37 @@ void handlePoop() {
 
 void handleHeart() {
   emit("mqtt", "I can handle " + HEART);
+  doDogHeart();
+
 }
 
 void handleThumbsUp() {
   emit("mqtt", "I can handle " + THUMBS_UP);
+  startRumble();
+  doDogLanding();
+  stopRumble();
 }
 
 void doDogPoop() {
 
 }
 
-void doDogHeart() {
+void doDogThumbsUp() {
 
 }
 
-void doDogThumbsUp() {
+void doDogHeart() {
+  for (int i=0; i<7; i++) {
+  fadeToAndHoldColor(DOG_LIGHT, COLOR_RED, 10);
+  fadeToAndHoldColor(DOG_LIGHT, COLOR_OFF, 0);
+  }
+}
 
+void doDogLanding() {
+  for (int i=0; i<7; i++) {
+    fadeToAndHoldColor(DOG_LIGHT, COLOR_WHITE, 0);
+    fadeToAndHoldColor(DOG_LIGHT, COLOR_OFF, 0);
+  }
 }
 
 // Tardis handlers /////////////////////////////////////////////////////////////
