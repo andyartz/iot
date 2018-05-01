@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "servo.h"
 
-const String VERSION = "v2.0.13";
+const String VERSION = "v2.0.15";
 
 const int BAUD_RATE = 115200;
 
@@ -343,51 +343,50 @@ void handleUnknown(String payload) {
 // DOG handlers /////////////////////////////////////////////////////////////
 int DOG_LIGHT = MAIN_LED;
 const int DOG_POOP_SOUND = 0;
-const int DOG_BARK_SOUND = 2;
-const int DOG_HEART_SOUND = 1;
+const int DOG_BARK_SOUND = 1;
+const int DOG_HEART_SOUND = 2;
 
 
 void handlePoop() {
-  emit("mqtt", "I can handle " + POOP);
-  oscillate(40,-40,350,10);
-  playSound(DOG_POOP_SOUND);
+  doDogPoop();
 }
 
 void handleHeart() {
   emit("mqtt", "I can handle " + HEART);
   playSound(DOG_HEART_SOUND);
   while(soundIsPlaying()) {
-    doDogHeart();
+    doDogHeartLEDS();
   }
-
 }
 
 void handleThumbsUp() {
+  doDogThumbsUp();
+}
+
+void doDogPoop() {
+  emit("mqtt", "I can handle " + POOP);
+  oscillate(40,-40,350,10);
+  playSound(DOG_POOP_SOUND);
+}
+
+void doDogThumbsUp() {
   emit("mqtt", "I can handle " + THUMBS_UP);
   playSound(DOG_BARK_SOUND);
   while(soundIsPlaying()) {
     startRumble();
-    doDogLanding();
+    doDogThumbsUpLEDS();
   }
   stopRumble();
 }
 
-void doDogPoop() {
-
-}
-
-void doDogThumbsUp() {
-
-}
-
-void doDogHeart() {
+void doDogHeartLEDS() {
   for (int i=0; i<5; i++) {
   fadeToAndHoldColor(DOG_LIGHT, COLOR_RED, 1);
   fadeToAndHoldColor(DOG_LIGHT, COLOR_OFF, 0);
   }
 }
 
-void doDogLanding() {
+void doDogThumbsUpLEDS() {
   for (int i=0; i<5; i++) {
     fadeToAndHoldColor(DOG_LIGHT, COLOR_WHITE, 0);
     fadeToAndHoldColor(DOG_LIGHT, COLOR_OFF, 0);
